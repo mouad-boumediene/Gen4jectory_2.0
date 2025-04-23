@@ -380,6 +380,45 @@ class UAVFlightModel:
                 break
         # append the final velocity to the list
         return round(self.v, 1)
+    
+    # Finding the final time and distance traveled via Euler's method and simple calculations
+    # once terminal velocity has been reached
+    def finding_time_distance_Euler_optimised(self):
+        # Initialize variables
+        t = 0
+        dist_trvld = 0
+        # Tolerance for acceleration (m/s^2) to make sure that terminal velocity has been reached
+        tol = 0.01
+        # Iterate using Euler's method
+        while True:
+            # Update time
+            t += self.delta_time
+            # Calculate net force
+            f_net = self.f_tr - 0.5 * self.rho * self.csa * self.c_d * self.v ** 2
+            # Calculate acceleration
+            a = f_net / self.m
+            # condition for calculating velocity until the terminal one has been reached
+            if abs(a) > tol:
+                # Update velocity
+                self.v += a * self.delta_time
+                # Update position
+                dist_trvld += self.v * self.delta_time
+            # condition for calculating velocity once the terminal one has been reached
+            if abs(a) <= tol:
+                print("Tolerance for acceleration:", tol)
+                print("Flight with acceleration != 0. Distance (m):", round(dist_trvld,2), "Time (s):", round(t, 2))
+                remaining_dist = self.distance_plnd - dist_trvld  # distance of flight with terminal velocity
+                t_with_vt = remaining_dist / self.v  # time of flight with terminal velocity
+                t = t + t_with_vt  # update the total time
+                dist_trvld = self.distance_plnd  # Update position
+                print(f"Total values. v (m/s): {self.v:.1f}, a (m/s^2): {a:.2f}, t (s): {t:.2f}, Dist_trvld (m): {dist_trvld:.2f}")
+                break
+            # Check for termination condition (desired distance_plnd reached)
+            if dist_trvld >= self.distance_plnd:
+                self.t_final = t
+                break
+
+        return round(self.v, 1)
 
 
     def finding_time_distance_simple(self):
@@ -404,7 +443,9 @@ class UAVFlightModel:
         self.flight_modes_IA_IB_IIB()
         self.flight_modes_IIA_IIIA_IIIB()
         self.vertical_flight_modes()
-        v_f = self.finding_time_distance_Euler()
+        #v_f = self.finding_time_distance_Euler()
+        v_f = self.finding_time_distance_Euler_optimised()
+        #print('found euler velocity:', v_f)
         self.finding_time_distance_simple()
 
         # Printing final results

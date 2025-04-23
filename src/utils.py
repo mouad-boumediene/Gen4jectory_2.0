@@ -83,7 +83,7 @@ def create_grid_3D(bounds: list[tuple[float, float]], resolution: float) -> np.n
     """
     x = np.arange(bounds[0][0], bounds[0][1] + 1, resolution)
     y = np.arange(bounds[1][0], bounds[1][1] + 1, resolution)
-    z = np.arange(bounds[2][0], bounds[2][1] + 1, resolution)
+    z = np.arange(bounds[2][0], bounds[2][1] + 1, configs.z_resolution)
     grid = np.array(np.meshgrid(x, y, z)).T.reshape(-1, 3)
     return grid
 

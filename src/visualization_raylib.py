@@ -7,6 +7,7 @@ import numpy as np
 import time
 from src.Box import Endbox
 from src.utils import draw_box_between_points
+from pyray import *
 pr.set_trace_log_level(pr.LOG_WARNING)
 
 
@@ -70,7 +71,7 @@ def draw_paths(uavs:list[UAV], graph:nx.Graph):
                         uav.color)
             if i > 0:
                 pr.draw_line_3d(graph.nodes[uav.path[i]]['coords'], 
-                                graph.nodes[uav.path[i-1]]['coords'],pr.color_alpha((255,0,0),0.05) )
+                                graph.nodes[uav.path[i-1]]['coords'],pr.color_alpha((255,0,0),0.5) )
                 
                 
 
@@ -328,28 +329,70 @@ def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bo
     pr.init_window(configs.window_w, configs.window_h, "Visualizing 4D drone path planning")
     pr.set_target_fps(configs.fps)
     
-
+    cam_speed = 50.0
     sim_time = 0 
     last_time = time.time()
     paused = False
-    if bounds :
-        # Calculate the center of the box
-        box_center = [np.mean(axis) for axis in bounds]  # [10.0, 10.0, 10.0]
-        camera = pr.Camera3D([bounds[0][1]*1.8, bounds[1][1]*1.8, bounds[2][1]*1.8], box_center, [0.0, 0.0, 1.0], 45.0, 0)
-    else:
-        camera = configs.camera
+    # Calculate the center of the box
+    box_center = [np.mean(axis) for axis in bounds]  # [10.0, 10.0, 10.0]
+    cam = pr.Camera3D([bounds[0][1]*1.1, bounds[1][1]*1.1, bounds[2][1]*1.1], box_center, [0.0, 0.0, 500.0], 45.0, 0)
+
     while not pr.window_should_close():
         current_time = time.time()
         delta_time = current_time - last_time
         last_time = current_time
         
-        pr.update_camera(camera, pr.CameraMode.CAMERA_FREE)
+        dt = pr.get_frame_time()
+        pr.update_camera(cam, pr.CameraMode.CAMERA_FREE)
+
+        # compute forward & right axes based on current camera orientation
+        forward = pr.vector3_normalize(pr.vector3_subtract(cam.target, cam.position))
+        right   = pr.vector3_normalize(pr.vector3_cross_product(forward, pr.Vector3(0, 1, 0)))
+
+        # WSAD controls
+        if pr.is_key_down(pr.KEY_W):
+            if pr.is_key_down(pr.KEY_LEFT_SHIFT):
+                delta = pr.vector3_scale(forward,  cam_speed * dt)
+            else:
+                delta = pr.vector3_scale(forward,  cam_speed * dt * 0.1)
+            cam.position = pr.vector3_add(cam.position, delta)
+            cam.target   = pr.vector3_add(cam.target,   delta)
+        if pr.is_key_down(pr.KEY_S):
+            if pr.is_key_down(pr.KEY_LEFT_SHIFT):
+                delta = pr.vector3_scale(forward,  -cam_speed * dt)
+            else:
+                delta = pr.vector3_scale(forward,  -cam_speed * dt * 0.1)
+            cam.position = pr.vector3_add(cam.position, delta)
+            cam.target   = pr.vector3_add(cam.target,   delta)
+        if pr.is_key_down(pr.KEY_D):
+            if pr.is_key_down(pr.KEY_LEFT_SHIFT):
+                delta = pr.vector3_scale(right,  -cam_speed * dt)
+            else:
+                delta = pr.vector3_scale(right,  -cam_speed * dt * 0.1)
+            cam.position = pr.vector3_add(cam.position, delta)
+            cam.target   = pr.vector3_add(cam.target,   delta)
+        if pr.is_key_down(pr.KEY_A):
+            if pr.is_key_down(pr.KEY_LEFT_SHIFT):
+                delta = pr.vector3_scale(right,  cam_speed * dt)
+            else:
+                delta = pr.vector3_scale(right,  cam_speed * dt * 0.1)
+            cam.position = pr.vector3_add(cam.position, delta)
+            cam.target   = pr.vector3_add(cam.target,   delta)
+
+        # Q/E for vertical movement
+        if pr.is_key_down(pr.KEY_SPACE):
+            cam.position.z += cam_speed * dt
+            cam.target.z   += cam_speed * dt
+        if pr.is_key_down(pr.KEY_LEFT_CONTROL):
+            cam.position.z -= cam_speed * dt
+            cam.target.z  -= cam_speed * dt
         
         pr.begin_drawing()
         pr.clear_background(pr.WHITE)
         
         
-        pr.begin_mode_3d(camera)
+        pr.begin_mode_3d(cam)
+        #cam.position = pr.Vector3(0,0,200)
         #pr.draw_grid(20, 1.0)
         draw_axis(bounds)
         draw_buildings(buildings)

@@ -39,6 +39,7 @@ theta_star.visualize_graph_3d()
 
 
 end_nodes = uav_generator.gen_random_endpoints(theta_star.graph, bounds, configs.num_agents, obstacles=buildings)
+
 #end_nodes = uav_generator.gen_clock_endpoints(theta_star.graph)
 
 

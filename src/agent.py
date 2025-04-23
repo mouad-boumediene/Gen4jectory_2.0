@@ -6,7 +6,7 @@ import pyray as pr
 import numpy as np
 from src.drone_model import UAVFlightModel
 from src import configs
-
+import logging
 class UAV:
     def __init__(self,drone_id, max_thrust, mass, csa, c_d,theta_limit):
         self.m = mass # Mass of the UAV, kg
@@ -87,8 +87,9 @@ class UAV:
         waypoints = [grand_parent, parent, child]
 
         # Simulate flight
+        logging.info("planning flight ...")
         v_0, v_f, flight_time, simple_flight_time = self.flight_parameters.simulate_flight(v_f_parent,waypoints)
-
+        logging.info("done planning flight")
         return v_0, v_f, flight_time, simple_flight_time
     
 

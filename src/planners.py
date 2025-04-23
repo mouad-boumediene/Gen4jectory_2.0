@@ -57,7 +57,7 @@ class ThetaStar:
                             # Direct neighbors (6 directions)
                             (x + resolution, y, z), (x - resolution, y, z),
                             (x, y + resolution, z), (x, y - resolution, z),
-                            (x, y, z + resolution), (x, y, z - resolution)]
+                            (x, y, z + configs.z_resolution), (x, y, z - configs.z_resolution)]
             """,
                             
             
@@ -241,10 +241,12 @@ class ThetaStar:
                 else: 
                     # the flight time is calculated using the flight model
                     # given the current node(i.e parent), it's parent (grandparent) and the neighbor(i.e. child)
+                    
                     v_0, v_f, flight_time, simple_flight_time = uav.calculate_flight_time(self.graph.nodes[current]['v_f'], 
                                                                     self.graph.nodes[parent]['coords'], 
                                                                     self.graph.nodes[current]['coords'], 
                                                                     self.graph.nodes[neighbor]['coords'])
+                    
                     
                     # the grand_parent node is needed if the line_of_sight(ls) is true
                     if parent == start: # it the parent is the start node its parent will be itself
@@ -319,6 +321,7 @@ class ThetaStar:
                         # (boxes for the same uav can intersect)
                         splitted_segment_hitboxes = hit_box.split_box()
                         segment_hit_boxes = self.handle_seperation(splitted_segment_hitboxes)
+                        print(f"segment hit boxes {len(segment_hit_boxes)}")
 
                         is_intersect = False
                         for new_hit_box in segment_hit_boxes:

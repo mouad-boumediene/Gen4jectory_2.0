@@ -16,15 +16,16 @@ collision_radius = buffer_zone_size
 collision_spheres_dist = 1
 
 
-num_agents = 25
-bounds = [(0, 350), (0, 350), (0, 150)] 
-num_buildings,builduing_base_size = 5, 20
+num_agents = 10
+bounds = [(0, 160_000), (0, 160_000), (0, 150)] 
+num_buildings,builduing_base_size =0, 2
 
 # Calculate the center of the box
 box_center = [np.mean(axis) for axis in bounds]  # [10.0, 10.0, 10.0]
-camera = pr.Camera3D([bounds[0][1]*1.8, bounds[1][1]*1.8, bounds[2][1]*1.8], box_center, [0.0, 0.0, 1.0], 45.0, 0)
+camera = pr.Camera3D([bounds[0][1], bounds[1][1], bounds[2][1]], box_center, [0.0, 0.0, 1.0], 500.0, 0)
 
-resolution = 50 # every x meters make a node in each axis
+resolution = bounds[0][1]/5 # every x meters make a node in x and y axes
+z_resolution = 50 # every x meters make a node in the z axis
 
 num_iterations = 1000 
 
