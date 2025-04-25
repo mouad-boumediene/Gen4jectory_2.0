@@ -1,7 +1,7 @@
 from src.planners import ThetaStar
 from src.agent import UAVGenerator, UAV
 from src.utils import gen_endbox, gen_startbox  # Make sure this import is correct
-from src.utils import get_LoS, generate_buildings
+from src.utils import get_LoS, generate_buildings, compute_segment_intersections
 
 import numpy as np
 from src import configs
@@ -40,6 +40,13 @@ theta_star.visualize_graph_3d()
 
 end_nodes = uav_generator.gen_random_endpoints(theta_star.graph, bounds, configs.num_agents, obstacles=buildings)
 
+# Compute intersections on the finite segments
+intersections = compute_segment_intersections(theta_star.graph.nodes, end_nodes)
+print("Intersections per UAV:")
+for i, lst in enumerate(intersections):
+    print(f" UAV {i}:", lst)
+exit()
+
 #end_nodes = uav_generator.gen_clock_endpoints(theta_star.graph)
 
 
@@ -66,7 +73,7 @@ start_time_point = time.time()  # Start time measurement
 for i, uav in enumerate(tqdm(uavs, desc="Planning paths")):
     start, goal = end_nodes[i]
     start_position = theta_star.graph.nodes[start]["coords"]
-    uav.plan_path(uavs, planner=theta_star, start=start, goal=goal)
+    uav.plan_path(uavs, planner=theta_star, start=start, goal=goal, endpoints_intersections=intersections)
     
     if uav.path is None:
         print('no path is found')

@@ -63,7 +63,7 @@ class UAV:
     def update_position(self, position):
         self.current_position = position
 
-    def plan_path(self,uavs, planner , start, goal)->None:
+    def plan_path(self,uavs, planner , start, goal, endpoints_intersections)->None:
         start_time = 0
         for start_time in np.arange(0, 50, 1):
             if start_time != 0:
