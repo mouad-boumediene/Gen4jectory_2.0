@@ -11,6 +11,7 @@ from src.agent import UAV
 from src import configs
 import logging
 import copy
+import time
 
 from matplotlib import pyplot as plt
 
@@ -319,6 +320,8 @@ class ThetaStar:
                         
                         # check if the box intersects with other boxes
                         # (boxes for the same uav can intersect)
+                        # mesure how much time splitting boxes and handling seperation take
+                        split_box_time = time.time()
                         splitted_segment_hitboxes = hit_box.split_box_new(intersections,configs.intersection_collision_radius)
                         segment_hit_boxes = self.handle_seperation(splitted_segment_hitboxes)
                         #print(f"segment hit boxes {len(segment_hit_boxes)}")

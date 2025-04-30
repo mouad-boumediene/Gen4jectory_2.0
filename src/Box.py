@@ -226,7 +226,7 @@ class Hitbox(Box):
     def split_box_new(self,
               sphere_centers: list,
               sphere_radius: float,
-              coarse_length: float = configs.box_fixed_length,
+              coarse_length: float = configs.box_fixed_length*5,
               fine_length:   float = configs.box_fixed_length) -> list:
         """
         Splits a 3D hitbox into fixed-length segments:
@@ -304,13 +304,19 @@ class Hitbox(Box):
         # 5) Build segments list
         segments = []
 
-        # 5a) Outside: one segment per interval
+        # 5a) Outside: subdivide into fixed-length segments (no overlap)
+        step_coarse = coarse_length / total_len
         for a, b in outside:
-            p0 = P0 + a * D
-            p1 = P0 + b * D
-            segments.append((p0, p1, 'outside'))
+            t = a
+            while t < b - 1e-8:
+                t0 = t
+                t1 = min(b, t + step_coarse)
+                p0 = P0 + t0 * D
+                p1 = P0 + t1 * D
+                segments.append((p0, p1, 'outside'))
+                t += step_coarse
 
-        # 5b) Inside: overlapping fixed-length segments
+        # 5b) Inside: overlapping fixed-length segments: overlapping fixed-length segments
         for a, b in inside:
             P0_i = P0 + a * D
             P1_i = P0 + b * D
@@ -358,6 +364,7 @@ class Hitbox(Box):
             hitboxes.append(hb)
 
         return hitboxes
+
 
     
 class ObstacleBox(Box):

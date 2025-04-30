@@ -17,7 +17,7 @@ collision_spheres_dist = 1
 intersection_collision_radius = 100
 
 
-num_agents = 20
+num_agents = 10
 bounds = [(0, 1_000), (0, 1_000), (0, 150)] 
 num_buildings,builduing_base_size =0, 2
 
