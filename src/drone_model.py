@@ -405,13 +405,13 @@ class UAVFlightModel:
                 dist_trvld += self.v * self.delta_time
             # condition for calculating velocity once the terminal one has been reached
             if abs(a) <= tol:
-                print("Tolerance for acceleration:", tol)
-                print("Flight with acceleration != 0. Distance (m):", round(dist_trvld,2), "Time (s):", round(t, 2))
+                #print("Tolerance for acceleration:", tol)
+                #print("Flight with acceleration != 0. Distance (m):", round(dist_trvld,2), "Time (s):", round(t, 2))
                 remaining_dist = self.distance_plnd - dist_trvld  # distance of flight with terminal velocity
                 t_with_vt = remaining_dist / self.v  # time of flight with terminal velocity
                 t = t + t_with_vt  # update the total time
                 dist_trvld = self.distance_plnd  # Update position
-                print(f"Total values. v (m/s): {self.v:.1f}, a (m/s^2): {a:.2f}, t (s): {t:.2f}, Dist_trvld (m): {dist_trvld:.2f}")
+                #print(f"Total values. v (m/s): {self.v:.1f}, a (m/s^2): {a:.2f}, t (s): {t:.2f}, Dist_trvld (m): {dist_trvld:.2f}")
                 break
             # Check for termination condition (desired distance_plnd reached)
             if dist_trvld >= self.distance_plnd:

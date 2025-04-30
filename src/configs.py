@@ -8,16 +8,17 @@ mapping_resolution = 1
 
 seed = 21
 #box dimentions
-buffer_zone_size = 10
 box_fixed_length = 10
+buffer_zone_size = 10
 
 # collision detection
 collision_radius = buffer_zone_size
 collision_spheres_dist = 1
+intersection_collision_radius = 100
 
 
-num_agents = 10
-bounds = [(0, 160_000), (0, 160_000), (0, 150)] 
+num_agents = 20
+bounds = [(0, 1_000), (0, 1_000), (0, 150)] 
 num_buildings,builduing_base_size =0, 2
 
 # Calculate the center of the box

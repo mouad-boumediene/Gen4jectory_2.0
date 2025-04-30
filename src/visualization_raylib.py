@@ -53,7 +53,55 @@ def draw_collision_spheres(uavs:list[UAV],sim_time, show_only=[]):
                                             position,
                                             1, 
                                             pr.color_alpha((0,255,0),0.05))
-                
+                                
+def draw_intersection_cylinders(intersections, collision_radius, cylinder_height=150):
+    """
+    Draw semi-transparent vertical cylinders at each intersection point along the Z-axis.
+
+    intersections: list of lists; each sublist corresponds to one UAV.
+        Each element is either a tuple (uav_id, x, y) or None.
+    collision_radius: radius of the cylinder base.
+    cylinder_height: height of each cylinder along the Z-axis.
+    """
+    # Pre-generate cylinder mesh and model once
+    mesh_radius = int(round(collision_radius))
+    mesh_height = int(round(cylinder_height))
+    print(mesh_height, mesh_radius)
+    slices = 16  # radial subdivisions
+    stacks = 5   # vertical subdivisions
+    cyl_mesh = pr.gen_mesh_cylinder(
+        mesh_radius,
+        mesh_height,
+        slices
+    )
+    cyl_model = pr.load_model_from_mesh(cyl_mesh)
+
+    # Draw each cylinder at the intersection coordinates
+    for uav_hits in intersections:
+        if not uav_hits:
+            continue
+        for hit in uav_hits:
+            if hit is None:
+                continue
+            # hit is (uav_id, x, y)
+            _, x, y = hit
+            # Position cylinder so its base sits on z=0 and it extends along Z
+            pos = pr.Vector3(x, y, 0)
+            # By default, cylinders are oriented along Y; rotate 90° around X to align with Z
+            rot_axis = pr.Vector3(1.0, 0.0, 0.0)
+            rot_angle = 90.0  # degrees
+            # uniform scaling along each axis
+            scale = pr.Vector3(1.0, 1.0, 1.0)
+            color = pr.color_alpha(pr.GREEN, 0.05)
+            pr.draw_model_ex(
+                cyl_model,
+                pos,
+                rot_axis,
+                rot_angle,
+                scale,
+                color
+            )
+
 
 def draw_paths(uavs:list[UAV], graph:nx.Graph):
     cube_mesh = pr.gen_mesh_cube(1,1,1)
@@ -324,7 +372,7 @@ def draw_buildings(buildings):
         pr.draw_cube(pr.Vector3(*building.center), building.length, building.width, building.height, pr.LIGHTGRAY)
         pr.draw_cube_wires(pr.Vector3(*building.center), building.length, building.width, building.height, pr.GRAY)
 
-def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bounds=False, end_nodes=[], show_only =None, clock_scen = False, draw_endboxes = False):
+def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bounds=False, end_nodes=[], show_only =None, clock_scen = False, draw_endboxes = False, intersections=[None]):
 
     pr.init_window(configs.window_w, configs.window_h, "Visualizing 4D drone path planning")
     pr.set_target_fps(configs.fps)
@@ -406,6 +454,7 @@ def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bo
         #draw_graph(graph)
         draw_uavs(uavs, graph)
         #draw_collision_spheres(uavs,sim_time,show_only)
+        #draw_intersection_cylinders(intersections, configs.intersection_collision_radius)
         draw_paths(uavs, graph)
         draw_boxes(uavs, sim_time, show_only,draw_endboxes)
         #draw_mesh_boxes(uavs, sim_time)

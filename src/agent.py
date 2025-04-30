@@ -69,7 +69,7 @@ class UAV:
             if start_time != 0:
                 print(f'replanning for agent {self.drone_id}, start time : {start_time} ')
                 self.start_time = start_time
-            self.path, self.hit_boxes = planner.plan(self, start, goal, start_time = start_time, uavs=uavs)
+            self.path, self.hit_boxes = planner.plan(self, start, goal, start_time = start_time, uavs=uavs, intersections=endpoints_intersections)
 
             if self.path is not None:
                 return self.path
@@ -87,9 +87,7 @@ class UAV:
         waypoints = [grand_parent, parent, child]
 
         # Simulate flight
-        logging.info("planning flight ...")
         v_0, v_f, flight_time, simple_flight_time = self.flight_parameters.simulate_flight(v_f_parent,waypoints)
-        logging.info("done planning flight")
         return v_0, v_f, flight_time, simple_flight_time
     
 

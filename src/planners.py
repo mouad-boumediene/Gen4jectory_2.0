@@ -168,7 +168,7 @@ class ThetaStar:
         return new_hit_boxes
         
     
-    def plan(self, uav:UAV, start, goal, start_time = 0, uavs=[]):
+    def plan(self, uav:UAV, start, goal, start_time = 0, uavs=[], intersections = [None]):
         path_graph = nx.Graph()
         path_graph.add_node(start, coords = self.graph.nodes[start]['coords'])
         
@@ -262,7 +262,7 @@ class ThetaStar:
                 
                 # check if this neighbor have direct line of sight
                 # to the parent of the current node
-                is_line_of_sight, split_hit_boxes = self.line_of_sight(uav,uavs, parent, neighbor, flight_time_ls, simple_flight_time_ls)
+                is_line_of_sight, split_hit_boxes = self.line_of_sight(uav,uavs, parent, neighbor, flight_time_ls, simple_flight_time_ls,intersections)
                 if is_line_of_sight:
                     tentative_g_score = g_score[parent] + flight_time_ls
 
@@ -319,9 +319,9 @@ class ThetaStar:
                         
                         # check if the box intersects with other boxes
                         # (boxes for the same uav can intersect)
-                        splitted_segment_hitboxes = hit_box.split_box()
+                        splitted_segment_hitboxes = hit_box.split_box_new(intersections,configs.intersection_collision_radius)
                         segment_hit_boxes = self.handle_seperation(splitted_segment_hitboxes)
-                        print(f"segment hit boxes {len(segment_hit_boxes)}")
+                        #print(f"segment hit boxes {len(segment_hit_boxes)}")
 
                         is_intersect = False
                         for new_hit_box in segment_hit_boxes:
@@ -349,7 +349,7 @@ class ThetaStar:
         return None, None
     
     
-    def line_of_sight(self,uav:UAV,uavs:list,node1, node2, flight_time, simple_flight_time):
+    def line_of_sight(self,uav:UAV,uavs:list,node1, node2, flight_time, simple_flight_time,intersections = [None]):
         nearest_node_time = self.graph.nodes[node1]['time']
         if node1 == node2:
             raise
@@ -363,7 +363,7 @@ class ThetaStar:
                          start_node= node1, 
                          end_node=node2)
                          
-        splitted_segment_hitboxes = hit_box.split_box()
+        splitted_segment_hitboxes = hit_box.split_box_new(intersections,configs.intersection_collision_radius)
         segment_hit_boxes = self.handle_seperation(splitted_segment_hitboxes)
         for new_hit_box in segment_hit_boxes:
             if check_hitbox_intersection(self.hit_boxes,uavs, uav.drone_id, new_hit_box, self.obstacles):
