@@ -149,34 +149,40 @@ def check_hitbox_intersection(hit_boxes,uavs, drone_id, new_hitbox, static_obsta
 
 
 
+from math import sqrt
+
 def closest_points_fromlists(p1, p2):
-    """Finds the closest pair of points between two lists of points."""
-    points1 = np.array(p1)
-    points2 = np.array(p2)
+    """Find closest pair by computing squared distances, then one sqrt."""
+    pts1 = np.asarray(p1)
+    pts2 = np.asarray(p2)
 
-    # Compute all pairwise distances using broadcasting
-    diff = points1[:, np.newaxis, :] - points2[np.newaxis, :, :]
+    # broadcast difference and compute squared distances
+    diff = pts1[:, None, :] - pts2[None, :, :]       # shape (m, n, d)
+    sq_dists = np.einsum('ijk,ijk->ij', diff, diff)  # shape (m, n)
+
+    # find minimum in squared distances
+    idx_flat = np.argmin(sq_dists)
+    i, j = divmod(idx_flat, sq_dists.shape[1])
+
+    # recover result
+    min_dist = sqrt(sq_dists[i, j])
+    return min_dist, (pts1[i], pts2[j])
 
 
-    distances = np.linalg.norm(diff, axis=2)
+def is_collide_old(box1:Box, box2:Box):
     
-    # Find the indices of the minimum distance
-    
-    min_index = np.unravel_index(np.argmin(distances, axis=None), distances.shape)
-    closest_pair = (points1[min_index[0]], points2[min_index[1]])
-    
-    # Retrieve the closest pair and the minimum distance
-    min_distance = distances[min_index]
-
-    return min_distance,closest_pair
-
-
-def is_collide(box1:Box, box2:Box):
     
     dist, _= closest_points_fromlists(box1.collisionSpheres, box2.collisionSpheres)
     if dist <= configs.collision_radius*2:
         return True
     return False
+
+def is_collide(box1: Box, box2: Box) -> bool:
+    """
+    Returns True if the two oriented hitboxes overlap (collision detected)
+    via the Separating-Axis-Theorem (no more point sampling).
+    """
+    return box1.collides_with(box2)
 
 def generate_points_along_line(P1, P2, point_spacing=configs.collision_spheres_dist):
     P1 = np.array(P1)

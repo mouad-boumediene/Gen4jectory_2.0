@@ -41,12 +41,62 @@ class Box(ABC):
         self.width = width
         self.height = height
         self.vertices = []
+        self.axes       = np.eye(3)                 # shape (3,3)
+        self.half_sizes = np.array([length/2,
+                                    width/2,
+                                    height/2])
         self.gen_box()
     
     @abstractmethod
     def gen_box(self):
         """ Method to generate the vertices of the box. """
         pass
+
+    def collides_with(self, other: "Box") -> bool:
+        """
+        Exact OBB‐vs‐OBB collision test (SAT) for ANY two Boxes.
+        Requires each box to have:
+          - .axes       : (3,3) array of local unit‐axes
+          - .half_sizes : (3,) array of half‐extents along those axes
+          - .center     : (3,) center point
+        """
+        A = self.axes       # (3,3)
+        B = other.axes      # (3,3)
+        a = self.half_sizes # (3,)
+        b = other.half_sizes
+
+        # 1) Rotation matrix R_ij = A_i · B_j
+        R = A @ B.T
+
+        # 2) Translation vector t in A’s local frame
+        t = A @ (other.center - self.center)
+
+        # 3) Absolute + epsilon
+        absR = np.abs(R) + 1e-8
+
+        # 4) A’s face‐normals
+        for i in range(3):
+            if abs(t[i]) > a[i] + np.dot(b, absR[i]):
+                return False
+
+        # 5) B’s face‐normals
+        for j in range(3):
+            if abs(t @ R[:, j]) > np.dot(a, absR[:, j]) + b[j]:
+                return False
+
+        # 6) cross‐product axes A_i × B_j
+        for i in range(3):
+            for j in range(3):
+                ra = (a[(i+1)%3] * absR[(i+2)%3, j] +
+                      a[(i+2)%3] * absR[(i+1)%3, j])
+                rb = (b[(j+1)%3] * absR[i, (j+2)%3] +
+                      b[(j+2)%3] * absR[i, (j+1)%3])
+                lhs = abs(t[(i+2)%3] * R[(i+1)%3, j] -
+                          t[(i+1)%3] * R[(i+2)%3, j])
+                if lhs > ra + rb:
+                    return False
+
+        return True
 
 @dataclass
 class Endbox(Box):
@@ -93,6 +143,13 @@ class Endbox(Box):
 
         self.radius = self.calculate_radius()
         self.collisionSpheres = [self.center]
+        self.axes       = np.eye(3)
+        self.half_sizes = np.array([half_length,
+                                     half_width,
+                                     half_height])
+
+
+    
         
  
 
@@ -119,10 +176,16 @@ class Hitbox(Box):
     projection : any = None
     radius: any = None
     collisionSpheres: any = None
+    
 
     def __post_init__(self):
         # Calculate the initial center position and then call the parent class's init
         self.length = euclidean(self.start_pos, self.end_pos)
+        # record your local axes (for Endbox it's just the world axes)
+        self.axes       = np.eye(3)                 # shape (3,3)
+        self.half_sizes = np.array([self.length/2,
+                                    self.width/2,
+                                    self.height/2])
         center = (np.array(self.start_pos) + np.array(self.end_pos)) / 2
         super().__init__(center, self.length, self.width, self.height)
         self.gen_box()
@@ -177,6 +240,14 @@ class Hitbox(Box):
 
         self.radius = self.calculate_radius()
         self.collisionSpheres = generate_points_along_line(self.start_pos,self.end_pos)
+
+        self.axes       = np.stack([edge_dir,
+                             perp_vector_1,
+                             perp_vector_2], axis=0)  # shape (3,3)
+        self.half_sizes = np.array([half_length,
+                                    half_width,
+                                    half_height])
+        
     
     def split_box(self, fixed_length=configs.box_fixed_length) -> list:
         total_length = self.length
@@ -226,7 +297,7 @@ class Hitbox(Box):
     def split_box_new(self,
               sphere_centers: list,
               sphere_radius: float,
-              coarse_length: float = configs.box_fixed_length*5,
+              coarse_length: float = configs.box_fixed_length*100,
               fine_length:   float = configs.box_fixed_length) -> list:
         """
         Splits a 3D hitbox into fixed-length segments:
