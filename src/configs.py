@@ -19,7 +19,7 @@ intersection_collision_radius = 100
 
 num_agents = 10
 bounds = [(0, 150), (0, 150), (0, 150)] 
-num_buildings,builduing_base_size =0, 2
+num_buildings,builduing_base_size =5, 15
 
 # Calculate the center of the box
 box_center = [np.mean(axis) for axis in bounds]  # [10.0, 10.0, 10.0]

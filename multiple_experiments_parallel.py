@@ -1,6 +1,6 @@
 from src.planners import ThetaStar
 from src.agent import UAVGenerator, UAV
-from src.utils import gen_endbox, gen_startbox, get_LoS, generate_buildings
+from src.utils import gen_endbox, gen_startbox, get_LoS, generate_buildings, compute_segment_intersections
 import numpy as np
 from src import configs
 import logging
@@ -53,7 +53,8 @@ def run_scenario(scen, visualize = False):
     logging.info("Generating starts and goals ...")
     theta_star = ThetaStar(buildings, bounds, resolution=configs.resolution)
     end_nodes = uav_generator.gen_random_endpoints(theta_star.graph, bounds, configs.num_agents, obstacles=buildings)
-
+    # Compute intersections on the finite segments
+    intersections = compute_segment_intersections(theta_star.graph.nodes, end_nodes)
     # Generate end boxes
     for i, uav in enumerate(uavs):
         start, goal = end_nodes[i]
@@ -71,7 +72,9 @@ def run_scenario(scen, visualize = False):
     for i, uav in enumerate(uavs):
         start, goal = end_nodes[i]
         start_position = theta_star.graph.nodes[start]["coords"]
-        uav.plan_path(uavs, planner=theta_star, start=start, goal=goal)
+        direct_path_intersections = intersections[i]
+        uav.plan_path(uavs, planner=theta_star, start=start, goal=goal, endpoints_intersections=direct_path_intersections)
+        
         if uav.path is None:
             print('no path is found')
             uav.start_hitbox = gen_startbox(start_position, drone_id=uav.drone_id)
@@ -103,8 +106,8 @@ if __name__ == "__main__":
 
     visualize = False
 
-    with ProcessPoolExecutor(max_workers=60) as executor:
-        futures = [executor.submit(run_scenario, scen, visualize) for scen in [404, 414, 415, 420, 608, 663, 695, 811, 823, 839, 885, 930, 942]]#range(configs.num_iterations)]
+    with ProcessPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(run_scenario, scen, visualize) for scen in range(configs.num_iterations)]
         for future in tqdm(futures, desc="Running scenarios"):
             future.result()  # Ensure each future is completed
 
