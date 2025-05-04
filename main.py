@@ -1,7 +1,7 @@
 from src.planners import ThetaStar
 from src.agent import UAVGenerator, UAV
 from src.utils import gen_endbox, gen_startbox  # Make sure this import is correct
-from src.utils import get_LoS, generate_buildings, compute_segment_intersections
+from src.utils import get_LoS, generate_buildings, compute_segment_intersections, generate_city
 
 import numpy as np
 from src import configs
@@ -21,7 +21,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', date
 # Map Creation
 logging.info("Creating a map ...")
 bounds = configs.bounds
-buildings = generate_buildings(num_buildings=configs.num_buildings, base_size=configs.builduing_base_size)
+#buildings = generate_buildings(num_buildings=configs.num_buildings, base_size=configs.builduing_base_size)
+buildings = generate_city(bounds, obstacle_density=0.036, base_size_pct=0.03, min_height=5, max_height=150)
 # Generating the Drones
 logging.info("Generating the Drones ...")
 uav_generator = UAVGenerator()
