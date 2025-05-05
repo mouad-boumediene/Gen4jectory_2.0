@@ -17,7 +17,7 @@ collision_spheres_dist = 1
 intersection_collision_radius = 100
 
 
-num_agents = 10
+num_agents = 32
 bounds = [(0, 1_000), (0, 1_000), (0, 150)] 
 num_buildings,builduing_base_size =5, 15
 
@@ -25,10 +25,10 @@ num_buildings,builduing_base_size =5, 15
 box_center = [np.mean(axis) for axis in bounds]  # [10.0, 10.0, 10.0]
 camera = pr.Camera3D([bounds[0][1], bounds[1][1], bounds[2][1]], box_center, [0.0, 0.0, 1.0], 500.0, 0)
 
-resolution = bounds[0][1]/5 # every x meters make a node in x and y axes
-z_resolution = 50 # every x meters make a node in the z axis
+resolution = bounds[0][1]/10 # every x meters make a node in x and y axes
+z_resolution = 25 # every x meters make a node in the z axis
 
-num_iterations = 1000 
+num_iterations = 200 
 
 # stats
 stats_storage_path = "stats/4D_UAV_pathfinding_stats.csv"

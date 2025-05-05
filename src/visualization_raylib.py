@@ -372,6 +372,36 @@ def draw_buildings(buildings):
         pr.draw_cube(pr.Vector3(*building.center), building.length, building.width, building.height, pr.LIGHTGRAY)
         pr.draw_cube_wires(pr.Vector3(*building.center), building.length, building.width, building.height, pr.GRAY)
 
+def draw_ground(bounds, thickness=1.0,
+                color=pr.LIGHTGRAY, wire_color=pr.GRAY):
+    """
+    Draws a flat ground plane as a thin cube.
+
+    bounds: [(xmin, xmax), (ymin, ymax), (zmin, zmax)]
+      x,y are your horizontal extents; z is up.
+    thickness: how “tall” the ground‐cube is in the up (z) direction.
+    """
+    (xmin, xmax), (ymin, ymax), _ = bounds
+
+    # half‐sizes
+    size_x = xmax - xmin
+    size_y = ymax - ymin
+    half_thick = -thickness / 2.0
+
+    # center of the ground cube:
+    #   x: midpoint of [xmin,xmax]
+    #   y: midpoint of [ymin,ymax]
+    #   z: sit it so its top is at z=0 (i.e. bottom at z=-thickness)
+    center = pr.Vector3(
+        xmin + size_x/2.0,
+        ymin + size_y/2.0,
+        -half_thick
+    )
+
+    # draw a flat cube (width=X, depth=Y, height=thickness)
+    pr.draw_cube(       center, size_x, size_y, thickness, color)
+    pr.draw_cube_wires(center, size_x, size_y, thickness, wire_color)
+
 def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bounds=False, end_nodes=[], show_only =None, clock_scen = False, draw_endboxes = False, intersections=[None]):
 
     pr.init_window(configs.window_w, configs.window_h, "Visualizing 4D drone path planning")
@@ -444,6 +474,7 @@ def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bo
         #pr.draw_grid(20, 1.0)
         draw_axis(bounds)
         draw_buildings(buildings)
+        draw_ground(bounds, thickness=0.05, color=(245,245,245), wire_color=pr.GRAY)
 
 
 
@@ -451,7 +482,7 @@ def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bo
             sim_time = update_uavs_poses(uavs,end_nodes, graph, delta_time, sim_time, clock_scen)
             sim_time += delta_time
         draw_border(bounds)
-        #draw_graph(graph)
+        draw_graph(graph)
         draw_uavs(uavs, graph)
         #draw_collision_spheres(uavs,sim_time,show_only)
         #draw_intersection_cylinders(intersections, configs.intersection_collision_radius)

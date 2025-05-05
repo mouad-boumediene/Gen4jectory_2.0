@@ -65,7 +65,7 @@ class UAV:
 
     def plan_path(self,uavs, planner , start, goal, endpoints_intersections)->None:
         start_time = 0
-        for start_time in np.arange(0, 50, 1):
+        for start_time in np.arange(0, 150, 1):
             if start_time != 0:
                 print(f'replanning for agent {self.drone_id}, start time : {start_time} ')
                 self.start_time = start_time
@@ -228,7 +228,7 @@ class UAVGenerator:
 
             G.add_edge(start_id, goal_id, weight=distance(start, goal), reservations=[])
 
-            num_neighbors = 10
+            num_neighbors = 20
             for node, dist in start_distances[:num_neighbors]:
                 G.add_edge(start_id, node, weight=dist, reservations=[])
 

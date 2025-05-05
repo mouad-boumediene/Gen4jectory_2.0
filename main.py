@@ -10,8 +10,8 @@ from src.visualization_raylib import animate_raylib
 from tqdm import tqdm
 import random
 import time
-np.random.seed(1)
-random.seed(1)
+np.random.seed(144)
+random.seed(144)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -21,8 +21,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', date
 # Map Creation
 logging.info("Creating a map ...")
 bounds = configs.bounds
+buildings = []  # Initialize buildings as an empty list
 #buildings = generate_buildings(num_buildings=configs.num_buildings, base_size=configs.builduing_base_size)
-buildings = generate_city(bounds, obstacle_density=0.036, base_size_pct=0.03, min_height=5, max_height=150)
+buildings = generate_city(bounds, obstacle_density=0.036, base_size_pct=0.025, min_height=5, max_height=configs.bounds[2][1]-configs.bounds[2][0])
 # Generating the Drones
 logging.info("Generating the Drones ...")
 uav_generator = UAVGenerator()

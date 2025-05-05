@@ -26,6 +26,7 @@ class ThetaStar:
         logging.info("creating a graph")
         grid=create_grid_3D(bounds,resolution)
         filtered_grid = self._remove_nodes_in_obstacles(grid, obstacles)
+        #filtered_grid = self._remove_ground_nodes(filtered_grid)
         self.graph:nx.Graph = self._create_graph(filtered_grid, resolution)
         logging.info("created a graph")
         #self.graph.add_node('root',coors =())
@@ -43,6 +44,25 @@ class ThetaStar:
             else:
                 logging.debug('removed node in obstacles ')
         return filtered_grid
+    def _remove_ground_nodes(self, grid) -> list[tuple[float, float, float]]:
+        """
+        Filter out any grid point whose z‐coordinate is exactly zero.
+
+        Args:
+            grid: iterable of (x, y, z) points
+
+        Returns:
+            list of points with z != 0
+        """
+        filtered = []
+        for point in grid:
+            # assume point is a sequence or tuple of length 3
+            x, y, z = point
+            if z != 0:
+                filtered.append((x, y, z))
+            else:
+                logging.debug("removed node at ground level (z=0): %s", point)
+        return filtered
     
     def _create_graph(self, grid, resolution = configs.resolution)->nx.Graph:
         G = nx.Graph()
