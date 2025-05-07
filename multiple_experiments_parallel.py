@@ -44,7 +44,7 @@ def run_scenario(scen, visualize = False):
     bounds = configs.bounds
     buildings = []  # Initialize buildings as an empty list
     #buildings = generate_buildings(num_buildings=configs.num_buildings, base_size=configs.builduing_base_size)
-    buildings = generate_city(bounds, obstacle_density=0.036, base_size_pct=0.025, min_height=5, max_height=configs.bounds[2][1]-configs.bounds[2][0])
+    #buildings = generate_city(bounds, obstacle_density=0.036, base_size_pct=0.025, min_height=5, max_height=configs.bounds[2][1]-configs.bounds[2][0])
 
     # Generating the Drones
     logging.info("Generating the Drones ...")
@@ -62,7 +62,7 @@ def run_scenario(scen, visualize = False):
         start, goal = end_nodes[i]
         start_position = theta_star.graph.nodes[start]["coords"]
         goal_position = theta_star.graph.nodes[goal]["coords"]
-        uav.end_hitbox = gen_endbox(start_position, goal_position, uav.max_velocity, uav.drone_id,dynamic_time_span=True)
+        uav.end_hitbox = gen_endbox(start_position, goal_position, uav.max_velocity, uav.drone_id,dynamic_time_span=False)
         uav.start_hitbox = gen_startbox(start_position, goal_position, uav.max_velocity, uav.drone_id,dynamic_time_span=False)
         uav.hit_boxes = [[uav.end_hitbox, uav.start_hitbox]]
         theta_star.hit_boxes.extend([[uav.end_hitbox, uav.start_hitbox]])
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     visualize = False
 
-    with ProcessPoolExecutor(max_workers=10) as executor:
+    with ProcessPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run_scenario, scen, visualize) for scen in range(configs.num_iterations)]
         for future in tqdm(futures, desc="Running scenarios"):
             future.result()  # Ensure each future is completed

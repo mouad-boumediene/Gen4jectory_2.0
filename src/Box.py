@@ -52,18 +52,35 @@ class Box(ABC):
         """ Method to generate the vertices of the box. """
         pass
 
-    def collides_with(self, other: "Box") -> bool:
+    def collides_with(self, other: "Box",margin = 0.6) -> bool:
         """
-        Exact OBB‐vs‐OBB collision test (SAT) for ANY two Boxes.
+        Exact OBB‐vs‐OBB collision test (SAT) for ANY two Boxes, with an optional safety margin.
+
+        Parameters:
+        -----------
+        other : Box
+            The other box to test against.
+        margin : float, optional
+            How much to “grow” each box’s half‐extents in all directions
+            (default is 0.0, i.e. no inflation).
+
         Requires each box to have:
           - .axes       : (3,3) array of local unit‐axes
           - .half_sizes : (3,) array of half‐extents along those axes
           - .center     : (3,) center point
+
+        Returns:
+        --------
+        bool
+            True if the (inflated) boxes overlap; False otherwise.
         """
-        A = self.axes       # (3,3)
-        B = other.axes      # (3,3)
-        a = self.half_sizes # (3,)
-        b = other.half_sizes
+        
+        A = self.axes         # (3,3)
+        B = other.axes        # (3,3)
+
+        # Inflate half‐sizes by margin
+        a = self.half_sizes + margin  # (3,)
+        b = other.half_sizes + margin
 
         # 1) Rotation matrix R_ij = A_i · B_j
         R = A @ B.T
@@ -71,7 +88,7 @@ class Box(ABC):
         # 2) Translation vector t in A’s local frame
         t = A @ (other.center - self.center)
 
-        # 3) Absolute + epsilon
+        # 3) Absolute + epsilon for stability
         absR = np.abs(R) + 1e-8
 
         # 4) A’s face‐normals
@@ -294,25 +311,26 @@ class Hitbox(Box):
 
         return segments
     
+    
     def split_box_new(self,
-              sphere_centers: list,
-              sphere_radius: float,
-              coarse_length: float = configs.box_fixed_length*100,
-              fine_length:   float = configs.box_fixed_length) -> list:
+                  sphere_centers: list,
+                  sphere_radius: float,
+                  coarse_length: float = configs.box_fixed_length * 100,
+                  fine_length: float = configs.box_fixed_length) -> list:
         """
-        Splits a 3D hitbox into fixed-length segments:
-        - Each outside‐sphere interval yields one segment spanning from entry to exit.
-        - Inside sphere regions use overlapping segments of exact fine_length.
+        Splits a 3D hitbox into overlapping fixed-length segments in both outside and inside regions,
+        while preserving exactly computed times even if spatial endpoints are clamped.
 
         Args:
-        sphere_centers: list of (drone_id, x, y) tuples or None/[None]
-        sphere_radius:  radius of circles in XY plane
-        coarse_length: unused for outside (intervals not subdivided)
-        fine_length:   length of inside segments
+            sphere_centers: list of (drone_id, x, y) tuples or None entries
+            sphere_radius:  radius of cylinders in the XY plane
+            coarse_length: target segment length for outside regions
+            fine_length:   target segment length for inside regions
+
         Returns:
-        List of Hitbox instances covering [self.start_pos, self.end_pos].
+            List of Hitbox instances covering [self.start_pos, self.end_pos].
         """
-        # 0) Normalize sphere_centers to XY-plane points
+        # 0) Normalize sphere_centers to XY‐plane points
         valid_xy = []
         for entry in sphere_centers:
             if not entry or (isinstance(entry, (list, tuple)) and entry[0] is None):
@@ -328,8 +346,11 @@ class Hitbox(Box):
         if total_len == 0:
             return []
 
+        D_unit = D / total_len
+
         # 2) Project to XY for intersection math
-        P0_xy = P0[:2]; P1_xy = P1[:2]
+        P0_xy = P0[:2]
+        P1_xy = P1[:2]
         D_xy  = P1_xy - P0_xy
 
         # 3) Find inside‐sphere t‐intervals in [0,1]
@@ -341,7 +362,7 @@ class Hitbox(Box):
                 c2 = (P0_xy - C).dot(P0_xy - C) - sphere_radius**2
                 disc = b2*b2 - 4*a2*c2
                 if disc < 0:
-                    # potential full containment
+                    # Possible full containment
                     mid = P0_xy + 0.5 * D_xy
                     if np.linalg.norm(mid - C) <= sphere_radius:
                         intervals.append((0.0, 1.0))
@@ -353,7 +374,7 @@ class Hitbox(Box):
                 if end > start:
                     intervals.append((start, end))
 
-        # merge overlapping inside intervals
+        # Merge overlapping inside intervals
         intervals.sort(key=lambda x: x[0])
         inside = []
         for a, b in intervals:
@@ -372,62 +393,89 @@ class Hitbox(Box):
         if prev < 1.0:
             outside.append((prev, 1.0))
 
-        # 5) Build segments list
+        # 5) Build raw segment data (store times BEFORE any spatial clamp)
         segments = []
 
-        # 5a) Outside: subdivide into fixed-length segments (no overlap)
-        step_coarse = coarse_length / total_len
-        for a, b in outside:
-            t = a
-            while t < b - 1e-8:
-                t0 = t
-                t1 = min(b, t + step_coarse)
-                p0 = P0 + t0 * D
-                p1 = P0 + t1 * D
-                segments.append((p0, p1, 'outside'))
-                t += step_coarse
+        def add_segment(p0, p1, region_label):
+            # Compute fractional positions
+            t0 = np.linalg.norm(p0 - P0) / total_len
+            t1 = np.linalg.norm(p1 - P0) / total_len
+            # Map to absolute times
+            start_tm = self.start_time + t0 * self.duration
+            seg_dur  = (t1 - t0) * self.duration
+            segments.append({
+                "p0": p0,
+                "p1": p1,
+                "region": region_label,
+                "t0": t0,
+                "t1": t1,
+                "start_time": start_tm,
+                "duration": seg_dur
+            })
 
-        # 5b) Inside: overlapping fixed-length segments: overlapping fixed-length segments
+        # 5a) Outside: overlapping segments of length coarse_length
+        for a, b in outside:
+            P0_o = P0 + a * D
+            P1_o = P0 + b * D
+            region_len_o = np.linalg.norm(P1_o - P0_o)
+            if region_len_o <= 0:
+                continue
+
+            count_o = ceil(region_len_o / coarse_length)
+            overlap_o = ((count_o * coarse_length - region_len_o) / (count_o - 1)
+                        if count_o > 1 else 0.0)
+            dir_o = (P1_o - P0_o) / region_len_o
+            start_o = P0_o
+
+            for i in range(count_o):
+                end_o = start_o + dir_o * coarse_length
+                if i == count_o - 1:
+                    end_o = P1_o
+                add_segment(start_o, end_o, 'outside')
+                start_o = end_o - dir_o * overlap_o
+
+        # 5b) Inside: overlapping segments of length fine_length
         for a, b in inside:
             P0_i = P0 + a * D
             P1_i = P0 + b * D
-            region_len = np.linalg.norm(P1_i - P0_i)
-            if region_len <= 0:
+            region_len_i = np.linalg.norm(P1_i - P0_i)
+            if region_len_i <= 0:
                 continue
-            count = ceil(region_len / fine_length)
-            overlap = (count * fine_length - region_len) / (count - 1) if count > 1 else 0
-            dir_unit = (P1_i - P0_i) / region_len
-            start_pt = P0_i
-            for i in range(count):
-                end_pt = start_pt + dir_unit * fine_length
-                if i == count - 1:
-                    end_pt = P1_i
-                segments.append((start_pt, end_pt, 'inside'))
-                start_pt = end_pt - dir_unit * overlap
 
-        # 6) Clamp global endpoints and sort
-        D_unit = D / total_len
-        segments.sort(key=lambda s: np.dot(s[0] - P0, D_unit))
+            count_i = ceil(region_len_i / fine_length)
+            overlap_i = ((count_i * fine_length - region_len_i) / (count_i - 1)
+                        if count_i > 1 else 0.0)
+            dir_i = (P1_i - P0_i) / region_len_i
+            start_i = P0_i
+
+            for j in range(count_i):
+                end_i = start_i + dir_i * fine_length
+                if j == count_i - 1:
+                    end_i = P1_i
+                add_segment(start_i, end_i, 'inside')
+                start_i = end_i - dir_i * overlap_i
+
+        # 6) Spatial clamp of endpoints only (leave stored times intact)
+        eps = 1e-8
+        segments.sort(key=lambda s: np.dot(s["p0"] - P0, D_unit))
         if segments:
-            _, end0, r0 = segments[0]
-            segments[0] = (P0, end0, r0)
-            startN, _, rN = segments[-1]
-            segments[-1] = (startN, P1, rN)
+            first = segments[0]
+            if first["t0"] > eps:
+                first["p0"] = P0
+            last = segments[-1]
+            if (1.0 - last["t1"]) > eps:
+                last["p1"] = P1
 
-        # 7) Instantiate Hitbox objects
+        # 7) Instantiate Hitbox objects using stored temporal info
         hitboxes = []
-        for start_pt, end_pt, region in segments:
-            t0 = np.linalg.norm(start_pt - P0) / total_len
-            t1 = np.linalg.norm(end_pt   - P0) / total_len
-            seg_dur = (t1 - t0) * self.duration
-            start_tm = self.start_time + t0 * self.duration
+        for seg in segments:
             hb = Hitbox(
                 graph=self.graph,
                 drone_id=self.drone_id,
-                start_pos=start_pt.tolist(),
-                end_pos=end_pt.tolist(),
-                start_time=start_tm,
-                duration=seg_dur,
+                start_pos=seg["p0"].tolist(),
+                end_pos=seg["p1"].tolist(),
+                start_time=seg["start_time"],
+                duration=seg["duration"],
                 edge_start_pos=self.start_pos,
                 edge_end_pos=self.end_pos,
                 edge_duration=self.duration

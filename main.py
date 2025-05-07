@@ -10,8 +10,8 @@ from src.visualization_raylib import animate_raylib
 from tqdm import tqdm
 import random
 import time
-np.random.seed(144)
-random.seed(144)
+np.random.seed(124)
+random.seed(124)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -59,7 +59,7 @@ for i, uav in enumerate(uavs):
     start, goal = end_nodes[i]
     start_position = theta_star.graph.nodes[start]["coords"]
     goal_position = theta_star.graph.nodes[goal]["coords"]
-    uav.end_hitbox = gen_endbox(start_position,goal_position, uav.max_velocity, uav.drone_id,dynamic_time_span=True)
+    uav.end_hitbox = gen_endbox(start_position,goal_position, uav.max_velocity, uav.drone_id,dynamic_time_span=False)
     uav.start_hitbox = gen_startbox(start_position,goal_position, uav.max_velocity, uav.drone_id,dynamic_time_span=False)
     uav.hit_boxes = [[uav.end_hitbox, uav.start_hitbox]]
     theta_star.hit_boxes.extend([[uav.end_hitbox, uav.start_hitbox]])
@@ -99,4 +99,4 @@ LoS,LoS_UAVs = get_LoS(uavs)
 logging.info("Visualization ...")
 
 #visualization.plot_uav_paths(uavs, obstacles, graph=theta_star.graph, end_points = end_nodes)
-animate_raylib(uavs, buildings, graph=theta_star.graph, end_nodes = end_nodes, bounds=configs.bounds, show_only = LoS_UAVs, draw_endboxes = False, intersections= intersections)
+animate_raylib(uavs, buildings, graph=theta_star.graph, end_nodes = end_nodes, bounds=configs.bounds, show_only = LoS_UAVs, draw_endboxes = True, intersections= intersections)

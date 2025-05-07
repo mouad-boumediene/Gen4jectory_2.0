@@ -65,7 +65,7 @@ class UAV:
 
     def plan_path(self,uavs, planner , start, goal, endpoints_intersections)->None:
         start_time = 0
-        for start_time in np.arange(0, 150, 1):
+        for start_time in np.arange(0, 61, 1):
             if start_time != 0:
                 print(f'replanning for agent {self.drone_id}, start time : {start_time} ')
                 self.start_time = start_time
@@ -113,71 +113,6 @@ class UAVGenerator:
     def __init__(self):
         pass
     
-    def gen_clock_endpoints(
-        self, 
-        G: nx.Graph, 
-        uavs_to_simulate: list[int] = [1,2,3,4,5,6,7,8,9,10,11,12], 
-        z_level: float = 13.5, 
-        radius: float = 50, 
-        center: tuple[float, float] = (50, 50), 
-        num_neighbors: int = 8, 
-        min_distance: float = 0.5
-    ) -> list[tuple[int, int]]:
-        """
-        Generate start and goal positions for UAVs in a clock formation.
-
-        Args:
-            G (nx.Graph): Graph to add UAV nodes and edges.
-            uavs_to_simulate (list[int]): List of UAV indices to simulate.
-            z_level (float): Z-level (altitude) for UAV positions.
-            radius (float): Radius of the clock formation.
-            center (tuple[float, float]): Center of the clock formation.
-            num_neighbors (int): Number of nearest neighbors to connect.
-            min_distance (float): Minimum distance for edge creation.
-
-        Returns:
-            list[tuple[int, int]]: List of start and goal node ID pairs.
-        """
-        coordinates = []
-        num_drones = 12  # Number of drones (or clock positions)
-
-        for i in uavs_to_simulate:
-            angle = 2 * np.pi * (i - 1) / num_drones
-            
-            start_x = center[0] + radius * np.cos(angle)
-            start_y = center[1] + radius * np.sin(angle)
-            start = (start_x, start_y, z_level)
-
-            goal_x = center[0] - radius * np.cos(angle)
-            goal_y = center[1] - radius * np.sin(angle)
-            goal = (goal_x, goal_y, z_level)
-
-            start_id = len(G.nodes)
-            goal_id = start_id + 1
-
-            G.add_node(start_id, coords=start, velocity=0.0, time=0.0, node_type='S')
-            G.add_node(goal_id, coords=goal, velocity=0.0, time=0.0, node_type='G')
-
-            G.add_edge(start_id, goal_id, weight=distance(start, goal), reservations=[])
-
-            start_distances = [(node, distance(start, data['coords'])) for node, data in G.nodes(data=True) if node != start_id]
-            goal_distances = [(node, distance(goal, data['coords'])) for node, data in G.nodes(data=True) if node != goal_id]
-
-            start_distances.sort(key=lambda x: x[1])
-            goal_distances.sort(key=lambda x: x[1])
-
-            for node, dist in start_distances[:num_neighbors]:
-                if dist >= min_distance:
-                    G.add_edge(start_id, node, weight=dist, reservations=[])
-
-            for node, dist in goal_distances[:num_neighbors]:
-                if dist >= min_distance:
-                    G.add_edge(goal_id, node, weight=dist, reservations=[])
-
-            coordinates.append((start_id, goal_id))
-
-        return coordinates
-
     def gen_random_endpoints(
         self, 
         G: nx.Graph, 

@@ -140,7 +140,7 @@ def check_hitbox_intersection(hit_boxes,uavs, drone_id, new_hitbox, static_obsta
                     end_time_old = start_time_old + duration_old
                     # Check for spatial intersection and time overlap
                     if end_time_new >= start_time_old and start_time_new <= end_time_old:
-                        if is_collide(new_hitbox, hitbox):
+                        if is_collide(new_hitbox, hitbox, margin=0.6):
                             return True,[j] # false means thes two 4D hitboxes intersection
 
     return False
@@ -179,12 +179,12 @@ def is_collide_old(box1:Box, box2:Box):
         return True
     return False
 
-def is_collide(box1: Box, box2: Box) -> bool:
+def is_collide(box1: Box, box2: Box, margin = 0.6) -> bool:
     """
     Returns True if the two oriented hitboxes overlap (collision detected)
     via the Separating-Axis-Theorem (no more point sampling).
     """
-    return box1.collides_with(box2)
+    return box1.collides_with(box2,margin)
 
 def generate_points_along_line(P1, P2, point_spacing=configs.collision_spheres_dist):
     P1 = np.array(P1)
@@ -434,7 +434,7 @@ def get_LoS(uavs):
                                 end_time_new = start_time_new + duration_new
                                 # Check for spatial intersection and time overlap
                                 if end_time_new >= start_time_old and start_time_new <= end_time_old:
-                                    if is_collide(new_hitbox, hitbox):
+                                    if is_collide(new_hitbox, hitbox,margin=0.0):
                                         print('collision between\n')
                                         print(new_hitbox.center, hitbox.center)
                                         print(j,i)
