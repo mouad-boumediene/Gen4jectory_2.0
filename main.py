@@ -1,3 +1,14 @@
+"""
+Module: main_simulation.py
+Description:
+    Main entry-point script for 4-D trajectory planning:
+      - Generates a 3D city map (buildings).
+      - Instantiates UAVs and sampling start/goal hit-boxes.
+      - Plans UAV paths using the Theta* planner.
+      - Computes loss-of-separation (LoS) metrics.
+      - Visualizes results via Raylib animation.
+"""
+
 from src.planners import ThetaStar
 from src.agent import UAVGenerator, UAV
 from src.utils import gen_endbox, gen_startbox  # Make sure this import is correct

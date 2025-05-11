@@ -1,15 +1,17 @@
+"""
+Module: utils.py
+Description:
+    Collection of utility functions and classes for 4-D UAV pathfinding
+"""
 import numpy as np
 import pandas as pd
 import networkx as nx
 import numpy as np
-from src.Box import ObstacleBox
 from src.Box import Endbox, Box, Building
 import pyray as pr
 import logging
-from matplotlib import pyplot as plt
 from src import configs
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from collections import namedtuple
 import math
 
 
@@ -18,21 +20,6 @@ class Node:
         self.point = point
         self.parent = parent
         self.time = time
-
-
-class MapManager:
-    def __init__(self, bounds, n_obstacles=10):
-        self.bounds = bounds  # Bounds should be a list of tuples for each axis: [(x_min, x_max), (y_min, y_max), (z_min, z_max)]
-        self.obstacles = []
-        self.generate_initial_obstacles(n_obstacles)
-
-    def generate_initial_obstacles(self, n_obstacles):
-        for _ in range(n_obstacles):
-            # Randomly generate obstacle center within bounds
-            center = [np.random.uniform(low, high) for low, high in self.bounds]
-            # Randomly determine the size of the obstacle for each dimension
-            size = [np.random.uniform(1, 5) for _ in range(3)]  # Generate size for x, y, and z dimensions
-            self.obstacles.append(ObstacleBox(center, *size))
 
 
 def distance(point1, point2):
@@ -170,14 +157,6 @@ def closest_points_fromlists(p1, p2):
     min_dist = sqrt(sq_dists[i, j])
     return min_dist, (pts1[i], pts2[j])
 
-
-def is_collide_old(box1:Box, box2:Box):
-    
-    
-    dist, _= closest_points_fromlists(box1.collisionSpheres, box2.collisionSpheres)
-    if dist <= configs.collision_radius*2:
-        return True
-    return False
 
 def is_collide(box1: Box, box2: Box, margin = 0.6) -> bool:
     """

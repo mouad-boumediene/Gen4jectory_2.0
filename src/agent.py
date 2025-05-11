@@ -1,3 +1,11 @@
+"""
+Module: agent.py
+Description:
+    Defines the UAV and UAVGenerator classes for:
+      - Simulating UAV physical flight parameters via UAVFlightModel.
+      - Generating random or fixed start/goal endpoints on a NetworkX graph.
+      - Creating hit-boxes and computing distances while avoiding obstacles.
+"""
 import random
 import uuid
 import networkx as nx

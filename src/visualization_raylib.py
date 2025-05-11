@@ -1,7 +1,7 @@
 import pyray as pr
 from src import configs
 from src.agent import UAV
-from src.utils import ObstacleBox
+from src.utils import Box
 import networkx as nx
 import numpy as np
 import time
@@ -402,7 +402,7 @@ def draw_ground(bounds, thickness=1.0,
     pr.draw_cube(       center, size_x, size_y, thickness, color)
     pr.draw_cube_wires(center, size_x, size_y, thickness, wire_color)
 
-def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bounds=False, end_nodes=[], show_only =None, clock_scen = False, draw_endboxes = False, intersections=[None]):
+def animate_raylib(uavs: list[UAV], buildings: list[Box], graph=None, bounds=False, end_nodes=[], show_only =None, clock_scen = False, draw_endboxes = False, intersections=[None]):
 
     pr.init_window(configs.window_w, configs.window_h, "Visualizing 4D drone path planning")
     pr.set_target_fps(configs.fps)

@@ -1,3 +1,13 @@
+"""
+Module: multiple_experiments_parallel.py
+Description:
+    Parallel execution of UAV path-planning scenarios:
+      - Seeds repeatability via `scen` as RNG seed.
+      - Generates randomized city maps.
+      - Plans paths with the Theta* solver and checks loss-of-separation (LoS).
+      - Records per-scenario stats (CSV output via `store_results`).
+      - Optionally animates individual runs using Raylib.
+"""
 from src.planners import ThetaStar
 from src.agent import UAVGenerator, UAV
 from src.utils import gen_endbox, gen_startbox, get_LoS, generate_buildings, compute_segment_intersections, generate_city

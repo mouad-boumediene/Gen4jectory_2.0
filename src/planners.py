@@ -1,3 +1,11 @@
+"""
+Module: planners.py
+Description:
+    Theta* path-planning for UAVs in 3D:
+      - Builds a 3D grid graph excluding obstacle nodes.
+      - Performs Theta* search with 4D hitbox collision checking.
+      - Reconstructs timed UAV trajectories and hit-box sequences.
+"""
 import numpy as np
 from src.utils import create_grid_3D
 import numpy as np

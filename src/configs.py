@@ -1,3 +1,14 @@
+"""
+Module: configs.py
+Description:
+    Configuration parameters for the 4-D UAV pathfinding simulation:
+      - Window, camera, and FPS settings
+      - Box dimensions and collision detection radii
+      - UAV count and environment bounds
+      - Grid resolution and iteration count
+      - Statistics output path
+"""
+
 import pyray as pr
 import numpy as np
 # camera

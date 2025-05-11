@@ -1,3 +1,10 @@
+"""
+Module: Box.py
+Description:
+    - Box (ABC): oriented‐bounding‐box base class with SAT collision test
+    - Endbox / Hitbox: specialized boxes for UAV hit‐zones, with segmentation
+    - Buildings: static obstacle representations in 3D space
+"""
 import numpy as np
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -266,52 +273,6 @@ class Hitbox(Box):
                                     half_height])
         
     
-    def split_box(self, fixed_length=configs.box_fixed_length) -> list:
-        total_length = self.length
-        num_segments = ceil(total_length / fixed_length)
-        overlap = (num_segments * fixed_length - total_length) / (num_segments - 1) if num_segments > 1 else 0
-
-        total_duration = self.duration
-        segment_duration = total_duration / num_segments
-
-        segments = []
-        start_pos = np.array(self.start_pos)
-        current_start_time = self.start_time
-        for i in range(num_segments):
-            end_pos = start_pos + (fixed_length) * (np.array(self.end_pos) - np.array(self.start_pos)) / total_length
-            segment_end_time = current_start_time + segment_duration
-
-            if i == num_segments - 1:  # Handle the last segment explicitly
-                end_pos = np.array(self.end_pos)
-                segment_end_time = self.start_time + self.duration
-        
-            
-            segment = Hitbox(
-                graph=self.graph,
-                drone_id=self.drone_id,
-                start_pos=start_pos.tolist(),
-                end_pos=end_pos.tolist(),
-                start_time=current_start_time,
-                duration=segment_duration,
-                edge_start_pos = self.start_pos,
-                edge_end_pos = self.end_pos,
-                edge_duration = self.duration            
-            )
-
-            
-
-
-
-
-            segments.append(segment)
-
-            # Update start_pos and current_start_time for the next segment
-            start_pos = end_pos - overlap * (np.array(self.end_pos) - np.array(self.start_pos)) / total_length
-            current_start_time = segment_end_time
-
-        return segments
-    
-    
     def split_box_new(self,
                   sphere_centers: list,
                   sphere_radius: float,
@@ -485,36 +446,8 @@ class Hitbox(Box):
         return hitboxes
 
 
-    
-class ObstacleBox(Box):
-    """ ObstacleBox for static obstacles, inherits from Box. """
-    def __init__(self, center, length, width, height):
-        super().__init__(center, length, width, height)
-
-    def gen_box(self):
-        # Directions along the coordinate axes
-        x_dir = np.array([1, 0, 0])
-        y_dir = np.array([0, 1, 0])
-        z_dir = np.array([0, 0, 1])
-        
-        half_length = self.length / 2
-        half_width = self.width / 2
-        half_height = self.height / 2
-        
-        # Creating vertices for a cuboid
-        self.vertices = [
-            self.center + half_length * x_dir + half_width * y_dir + half_height * z_dir,
-            self.center + half_length * x_dir - half_width * y_dir + half_height * z_dir,
-            self.center + half_length * x_dir - half_width * y_dir - half_height * z_dir,
-            self.center + half_length * x_dir + half_width * y_dir - half_height * z_dir,
-            self.center - half_length * x_dir + half_width * y_dir + half_height * z_dir,
-            self.center - half_length * x_dir - half_width * y_dir + half_height * z_dir,
-            self.center - half_length * x_dir - half_width * y_dir - half_height * z_dir,
-            self.center - half_length * x_dir + half_width * y_dir - half_height * z_dir
-        ]
-
 class Building(Box):
-    """ ObstacleBox for static obstacles, inherits from Box. """
+    """ static obstacles, inherits from Box. """
     def __init__(self, center, length, width, height):
         super().__init__(center, length, width, height)
         self.min_corner = None
