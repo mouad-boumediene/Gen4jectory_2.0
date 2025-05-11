@@ -482,7 +482,7 @@ def animate_raylib(uavs: list[UAV], buildings: list[ObstacleBox], graph=None, bo
             sim_time = update_uavs_poses(uavs,end_nodes, graph, delta_time, sim_time, clock_scen)
             sim_time += delta_time
         draw_border(bounds)
-        draw_graph(graph)
+        #draw_graph(graph)
         draw_uavs(uavs, graph)
         #draw_collision_spheres(uavs,sim_time,show_only)
         #draw_intersection_cylinders(intersections, configs.intersection_collision_radius)

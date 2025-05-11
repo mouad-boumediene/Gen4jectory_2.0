@@ -15,9 +15,10 @@ collision_spheres_dist = 1
 intersection_collision_radius = 100
 
 
-num_agents = 1000
-bounds = [(0, 150), (0, 150), (0, 150)] 
-num_buildings,builduing_base_size =5, 15
+num_agents = 50
+
+bounds = [(0, 8_000), (0, 8_000), (0, 150)] 
+num_buildings,builduing_base_size =0, 15
 
 # Calculate the center of the box
 box_center = [np.mean(axis) for axis in bounds]  # [10.0, 10.0, 10.0]
@@ -29,6 +30,8 @@ z_resolution = 25 # every x meters make a node in the z axis
 num_iterations = 5 
 
 # stats
-stats_storage_path = "stats/4D_UAV_pathfinding_stats.csv"
+#stats_storage_path = "stats/4D_UAV_pathfinding_stats.csv"
+
+stats_storage_path = "stats/4D_UAV_pathfinding_stats_withObstacles.csv"
 
 

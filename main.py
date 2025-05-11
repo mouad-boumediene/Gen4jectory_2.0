@@ -23,7 +23,7 @@ logging.info("Creating a map ...")
 bounds = configs.bounds
 buildings = []  # Initialize buildings as an empty list
 #buildings = generate_buildings(num_buildings=configs.num_buildings, base_size=configs.builduing_base_size)
-buildings = generate_city(bounds, obstacle_density=0.036, base_size_pct=0.025, min_height=5, max_height=configs.bounds[2][1]-configs.bounds[2][0])
+buildings = generate_city(bounds, obstacle_density=0.0175, base_size_pct=0.025, min_height=5, max_height=configs.bounds[2][1]-configs.bounds[2][0])
 # Generating the Drones
 logging.info("Generating the Drones ...")
 uav_generator = UAVGenerator()
