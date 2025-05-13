@@ -11,7 +11,7 @@ Developing a multi-drone trajectory planning algorithm for air-space safety.
 | [![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/SkyIvanCoding) [![LinkedIn](https://img.shields.io/badge/-LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ivan-panov-0ba21476/) | [![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/mouad-boumediene) [![LinkedIn](https://img.shields.io/badge/-LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mouad-boumediene/) [![YouTube](https://img.shields.io/badge/-YouTube-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://www.youtube.com/channel/UCxeDM47jeD0CQTCTHJPzZaw) [![Website](https://img.shields.io/badge/-Website-000000?style=flat-square&logo=web&logoColor=white)](https://mouadboumediene.com) |
 
 ## Requirements
-This project has been created in Python 3.9.8 using the following:
+This project has been created in Python 3.12.5 using the following:
 
 - colorama==0.4.4
 - matplotlib==3.5.2
@@ -28,4 +28,4 @@ This project has been created in Python 3.9.8 using the following:
   
 ## Hardware and software
 This project was developed on a desktop PC equipped with a 13th Gen Intel i9 16-core CPU and 32 GB of RAM, running Windows 11.
-All simulations were implemented in Python 3.12.
+All simulations were implemented in Python 3.12.5
