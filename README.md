@@ -1,8 +1,7 @@
 # Gen4jectory Algorithm – 4-D Trajectory Planning for Rotary-Wing UAVs
 
 ## Overview
-The Gen4jectory algorithm enables efficient planning of multiple 4-D trajectories for uncrewed rotary-wing aircraft. It ensures no Loss of Separation (LoS) incidents by considering the unique performance data of each UAV. This project covers the physical modeling of drone motion, map representation, pathfinding, and trajectory planning, with experimental results and discussions on future research directions.
-
+Gen4jectory 2.0 is a 4-D trajectory-planning framework for fleets of rotary-wing UAVs. It employs a rigorous OBB-vs-OBB collision check based on the Separating Axis Theorem (SAT) to guarantee zero Loss-of-Separation (LoS) events within each drone's separation volume. By fusing high-fidelity rotorcraft performance models with a traffic-aware pathfinder and time-parameterised trajectory smoothing, Gen4jectory 2.0 rapidly generates conflict-free schedules that honour individual aircraft kinematics and air-space constraints. The project includes detailed physical modelling, map representation, trajectory generation, and outlines future research directions.
 ## Project Objectives
 Developing a multi-drone trajectory planning algorithm for air-space safety.
 
@@ -26,3 +25,7 @@ This project has been created in Python 3.9.8 using the following:
 ## How to Run
 - Run `main.py` for a single visualized simulation.
 - Run `multiple_experiments_parallel.py` for performing a batch of experiments.
+  
+## Hardware and software
+This project was developed on a desktop PC equipped with a 13th Gen Intel i9 16-core CPU and 32 GB of RAM, running Windows 11.
+All simulations were implemented in Python 3.12.
