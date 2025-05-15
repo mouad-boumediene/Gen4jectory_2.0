@@ -26,9 +26,9 @@ collision_spheres_dist = 1
 intersection_collision_radius = 100
 
 
-num_agents = 10
+num_agents = 1
 
-bounds = [(0, 500), (0, 500), (0, 150)] 
+bounds = [(0, 350), (0, 350), (0, 150)] 
 num_buildings,builduing_base_size =0, 15
 
 # Calculate the center of the box
@@ -38,7 +38,7 @@ camera = pr.Camera3D([bounds[0][1], bounds[1][1], bounds[2][1]], box_center, [0.
 resolution = bounds[0][1]/10 # every x meters make a node in x and y axes
 z_resolution = 25 # every x meters make a node in the z axis
 
-num_iterations = 5 
+num_iterations = 1 
 
 # stats
 #stats_storage_path = "stats/4D_UAV_pathfinding_stats.csv"

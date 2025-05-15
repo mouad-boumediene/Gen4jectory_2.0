@@ -44,9 +44,7 @@ def run_scenario(scen, visualize = False):
         'ftime': np.inf,
         'simple_ftime': np.inf,
         'map_size': (configs.bounds[0][1], configs.bounds[1][1], configs.bounds[2][1]),
-        'resolution': configs.resolution,
-        'num_buildings': configs.num_buildings,
-        'building_base_size': configs.builduing_base_size
+        'resolution': configs.resolution
     }
 
     # Map Creation
@@ -117,9 +115,11 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     visualize = False
+    run_scenario(3,visualize=False)
 
-    with ProcessPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(run_scenario, scen, visualize) for scen in range(configs.num_iterations)]
+    """ with ProcessPoolExecutor(max_workers=5) as executor:
+        #futures = executor.submit(run_scenario, 3, visualize)
+        futures = [executor.submit(run_scenario, 3, visualize) for scen in range(configs.num_iterations)]
         for future in tqdm(futures, desc="Running scenarios"):
-            future.result()  # Ensure each future is completed
+            future.result()  # Ensure each future is completed """
 

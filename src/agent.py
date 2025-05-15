@@ -73,7 +73,7 @@ class UAV:
 
     def plan_path(self,uavs, planner , start, goal, endpoints_intersections)->None:
         start_time = 0
-        for start_time in np.arange(0, 61, 1):
+        for start_time in np.arange(0, 5*61, 1):
             if start_time != 0:
                 print(f'replanning for agent {self.drone_id}, start time : {start_time} ')
                 self.start_time = start_time

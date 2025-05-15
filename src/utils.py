@@ -307,7 +307,8 @@ def generate_city(bounds,
         raise ValueError("min_height cannot exceed max_height")
     if max_height > map_height:
         raise ValueError(f"max_height ({max_height}) exceeds map height ({map_height})")
-
+    if configs.bounds[0][1] < 1_000:
+        base_size_pct = 0.025 * 3 # 3 times the base size for small maps to avoid thin buildings
     # Compute base_size and grid
     base_size = base_size_pct * min(map_width, map_depth)
     n_x = int(np.floor(map_width / base_size))
