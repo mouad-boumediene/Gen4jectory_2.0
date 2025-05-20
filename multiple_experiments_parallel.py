@@ -42,7 +42,6 @@ def run_scenario(scen, visualize = False):
         'solved': True,
         'comp_time': 0.0,
         'ftime': np.inf,
-        'simple_ftime': np.inf,
         'map_size': (configs.bounds[0][1], configs.bounds[1][1], configs.bounds[2][1]),
         'resolution': configs.resolution
     }
@@ -96,7 +95,7 @@ def run_scenario(scen, visualize = False):
         TEST_STATS['solved'] = False
 
     TEST_STATS['ftime'] = round(sum([uav.total_flight_time for uav in uavs]), 2)
-    TEST_STATS['simple_ftime'] = round(sum([uav.total_simple_flight_time for uav in uavs]), 2)
+    #TEST_STATS['simple_ftime'] = round(sum([uav.total_simple_flight_time for uav in uavs]), 2)
 
     elapsed_time = time.time() - start_time_point
     TEST_STATS['comp_time'] = round(elapsed_time, 2)
@@ -115,11 +114,11 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     visualize = False
-    run_scenario(3,visualize=False)
+    #run_scenario(3,visualize=False)
 
-    """ with ProcessPoolExecutor(max_workers=5) as executor:
+    with ProcessPoolExecutor(max_workers=5) as executor:
         #futures = executor.submit(run_scenario, 3, visualize)
-        futures = [executor.submit(run_scenario, 3, visualize) for scen in range(configs.num_iterations)]
+        futures = [executor.submit(run_scenario, scen, visualize) for scen in range(configs.num_iterations)]
         for future in tqdm(futures, desc="Running scenarios"):
-            future.result()  # Ensure each future is completed """
+            future.result()  # Ensure each future is completed
 

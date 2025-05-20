@@ -94,6 +94,11 @@ scen,num_agents,solver,LoS,solved,comp_time,ftime,map_size,resolution
 1,50,Theta*,False,True,209.73,4620.99,"(8000, 8000, 150)",800.0
 4,50,Theta*,False,True,275.68,4362.54,"(8000, 8000, 150)",800.0
 0,50,Theta*,False,True,279.51,4558.98,"(8000, 8000, 150)",800.0
+0,1,Theta*,False,True,0.21,53.49,"(8000, 8000, 150)",800.0
+1,1,Theta*,False,True,0.22,165.42,"(8000, 8000, 150)",800.0
+2,1,Theta*,False,True,0.22,122.75,"(8000, 8000, 150)",800.0
+4,1,Theta*,False,True,0.24,243.62,"(8000, 8000, 150)",800.0
+3,1,Theta*,False,True,1.61,38.09,"(8000, 8000, 150)",800.0
 1,100,Theta*,False,True,1219.89,625.49,"(350, 350, 150)",35.0
 0,100,Theta*,False,True,1357.1,645.65,"(350, 350, 150)",35.0
 2,100,Theta*,False,True,952.92,592.07,"(350, 350, 150)",35.0
@@ -109,3 +114,4 @@ scen,num_agents,solver,LoS,solved,comp_time,ftime,map_size,resolution
 1,50,Theta*,False,True,256.71,337.93,"(350, 350, 150)",35.0
 4,50,Theta*,False,True,264.67,314.96,"(350, 350, 150)",35.0
 0,50,Theta*,False,True,285.95,371.05,"(350, 350, 150)",35.0
+
