@@ -26,9 +26,9 @@ collision_spheres_dist = 1
 intersection_collision_radius = 100
 
 
-num_agents = 1
+num_agents = 10
 
-bounds = [(0, 8_000), (0, 8_000), (0, 150)] 
+bounds = [(0, 500), (0, 500), (0, 150)] 
 num_buildings,builduing_base_size =0, 15
 
 # Calculate the center of the box
